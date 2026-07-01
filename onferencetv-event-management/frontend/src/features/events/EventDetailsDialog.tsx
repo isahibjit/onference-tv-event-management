@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 import { Download, Sparkles } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { closeViewDialog } from './eventSlice';
-import { useEvent, useGenerateContent } from './eventQueries';
+import { useGetEventByIdQuery, useGenerateContentMutation } from '@/app/apiSlice';
 import {
   Dialog,
   DialogContent,
@@ -15,23 +15,26 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
-export default function EventDetailsDialog() {
+export function EventDetailsDialog() {
   const dispatch = useAppDispatch();
   const { isViewDialogOpen, selectedEventId } = useAppSelector((state) => state.event);
 
-  const { data: event, isLoading } = useEvent(
-    isViewDialogOpen ? selectedEventId : null
+  const { data: eventResponse, isLoading } = useGetEventByIdQuery(
+    selectedEventId || '',
+    { skip: !isViewDialogOpen }
   );
+  
+  const event = eventResponse?.data;
 
-  const generateMutation = useGenerateContent();
+  const [generateContent, { isLoading: isGenerating }] = useGenerateContentMutation();
 
   const handleGenerateContent = async () => {
     if (!selectedEventId) return;
     try {
-      await generateMutation.mutateAsync(selectedEventId);
+      await generateContent(selectedEventId).unwrap();
       toast.success('Content generated successfully');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to generate content');
+      toast.error(error.data?.message || 'Failed to generate content');
     }
   };
 
@@ -141,10 +144,10 @@ export default function EventDetailsDialog() {
                     size="sm"
                     className="gap-2 text-primary hover:text-primary hover:bg-primary/10"
                     onClick={handleGenerateContent}
-                    disabled={generateMutation.isPending}
+                    disabled={isGenerating}
                   >
                     <Sparkles className="h-4 w-4" />
-                    {generateMutation.isPending ? 'Generating...' : 'Generate AI Content'}
+                    {isGenerating ? 'Generating...' : 'Generate AI Content'}
                   </Button>
                 )}
               </div>
@@ -173,10 +176,10 @@ export default function EventDetailsDialog() {
                     variant="outline"
                     className="gap-2"
                     onClick={handleGenerateContent}
-                    disabled={generateMutation.isPending}
+                    disabled={isGenerating}
                   >
                     <Sparkles className="h-4 w-4" />
-                    {generateMutation.isPending ? 'Generating...' : 'Generate AI Content'}
+                    {isGenerating ? 'Generating...' : 'Generate AI Content'}
                   </Button>
                 </div>
               )}

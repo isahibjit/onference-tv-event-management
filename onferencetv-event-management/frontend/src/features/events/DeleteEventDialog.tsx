@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { closeDeleteDialog } from './eventSlice';
-import { useDeleteEvent } from './eventQueries';
+import { useDeleteEventMutation } from '@/app/apiSlice';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,21 +13,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
-export default function DeleteEventDialog() {
+export function DeleteEventDialog() {
   const dispatch = useAppDispatch();
   const { isDeleteDialogOpen, selectedEventId } = useAppSelector((state) => state.event);
   
-  const deleteMutation = useDeleteEvent();
+  const [deleteEvent, { isLoading }] = useDeleteEventMutation();
 
   const handleDelete = async () => {
     if (!selectedEventId) return;
     
     try {
-      await deleteMutation.mutateAsync(selectedEventId);
+      await deleteEvent(selectedEventId).unwrap();
       toast.success('Event deleted successfully');
       dispatch(closeDeleteDialog());
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete event');
+      toast.error(error.data?.message || 'Failed to delete event');
     }
   };
 
@@ -42,16 +42,16 @@ export default function DeleteEventDialog() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
             onClick={(e) => {
               e.preventDefault();
               handleDelete();
             }}
             className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-            disabled={deleteMutation.isPending}
+            disabled={isLoading}
           >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            {isLoading ? 'Deleting...' : 'Delete'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -5,7 +5,7 @@ import { eventSchema } from './eventSchemas';
 import type { EventInput } from './eventSchemas';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { closeCreateDialog, closeEditDialog } from './eventSlice';
-import { useCreateEvent, useUpdateEvent, useEvent } from './eventQueries';
+import { useGetEventByIdQuery, useCreateEventMutation, useUpdateEventMutation } from '@/app/apiSlice';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-export default function EventFormDialog() {
+export function EventFormDialog() {
   const dispatch = useAppDispatch();
   const { isCreateDialogOpen, isEditDialogOpen, selectedEventId } = useAppSelector(
     (state) => state.event
@@ -27,12 +27,15 @@ export default function EventFormDialog() {
   const isOpen = isCreateDialogOpen || isEditDialogOpen;
   const isEditMode = isEditDialogOpen && !!selectedEventId;
 
-  const { data: eventToEdit, isLoading: isLoadingEvent } = useEvent(
-    isEditMode ? selectedEventId : null
+  const { data: eventToEditResponse, isLoading: isLoadingEvent } = useGetEventByIdQuery(
+    selectedEventId || '',
+    { skip: !isEditMode }
   );
+  
+  const eventToEdit = eventToEditResponse?.data;
 
-  const createMutation = useCreateEvent();
-  const updateMutation = useUpdateEvent();
+  const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
+  const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
 
   const {
     register,
@@ -53,7 +56,6 @@ export default function EventFormDialog() {
   useEffect(() => {
     if (isEditMode && eventToEdit) {
       setValue('eventName', eventToEdit.eventName);
-      // Ensure date is formatted as YYYY-MM-DD for the input type="date"
       const d = new Date(eventToEdit.eventDate);
       setValue('eventDate', d.toISOString().split('T')[0]);
       setValue('speakerName', eventToEdit.speakerName);
@@ -66,17 +68,17 @@ export default function EventFormDialog() {
   const onSubmit = async (data: EventInput) => {
     try {
       if (isEditMode && selectedEventId) {
-        await updateMutation.mutateAsync({ id: selectedEventId, data });
+        await updateEvent({ id: selectedEventId, data }).unwrap();
         toast.success('Event updated successfully');
         dispatch(closeEditDialog());
       } else {
-        await createMutation.mutateAsync(data);
+        await createEvent(data).unwrap();
         toast.success('Event created successfully');
         dispatch(closeCreateDialog());
       }
       reset();
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred while saving the event');
+      toast.error(error.data?.message || 'An error occurred while saving the event');
     }
   };
 
@@ -88,7 +90,7 @@ export default function EventFormDialog() {
     }
   };
 
-  const isWorking = createMutation.isPending || updateMutation.isPending;
+  const isWorking = isCreating || isUpdating;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

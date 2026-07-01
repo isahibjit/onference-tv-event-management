@@ -18,7 +18,7 @@ export const apiSlice = createApi({
     }),
     getEventById: builder.query<{ data: EventResponse }, string>({
       query: (id) => `/events/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Event', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Event', id }],
     }),
     createEvent: builder.mutation<{ data: EventResponse }, EventInput>({
       query: (newEvent) => ({
@@ -34,21 +34,21 @@ export const apiSlice = createApi({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
     }),
     deleteEvent: builder.mutation<{ data: null }, string>({
       query: (id) => ({
         url: `/events/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
+      invalidatesTags: (_result, _error, id) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
     }),
     generateContent: builder.mutation<{ data: EventResponse }, string>({
       query: (id) => ({
         url: `/events/${id}/generate-content`,
         method: 'POST',
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
+      invalidatesTags: (_result, _error, id) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
     }),
   }),
 });
