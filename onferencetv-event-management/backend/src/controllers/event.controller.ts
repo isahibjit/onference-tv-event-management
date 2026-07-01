@@ -91,7 +91,8 @@ export const deleteEvent = async (req: Request, res: Response, next: NextFunctio
 
 export const generateContent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const event = await eventService.generateContent(req.params.id as string);
+    const apiKey = req.body.apiKey;
+    const event = await eventService.generateContent(req.params.id as string, apiKey);
     if (!event) {
       res.status(404).json({
         success: false,

@@ -5,7 +5,7 @@ import {
   Download, Sparkles, ArrowLeft, Calendar as CalendarIcon, 
   MapPin, Edit, Trash2, Users 
 } from 'lucide-react';
-import { useGetEventByIdQuery } from '@/app/apiSlice';
+import { useGetEventByIdQuery, useGenerateContentMutation } from '@/app/apiSlice';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -15,7 +15,6 @@ import { toast } from 'sonner';
 import { useAppDispatch } from '@/app/hooks';
 import { openEditDialog, openDeleteDialog } from '@/features/events/eventSlice';
 import { useSavePdfExportMutation } from '@/features/pdf/pdfApi';
-import { useSaveAiHistoryMutation, useGenerateWithGeminiMutation } from '@/features/ai/aiApi';
 
 export function EventDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,56 +26,21 @@ export function EventDetailsPage() {
   });
   
   const event = eventResponse?.data;
-  const [generateWithGemini, { isLoading: isGenerating }] = useGenerateWithGeminiMutation();
-  const [saveAiHistory] = useSaveAiHistoryMutation();
+  const [generateContent, { isLoading: isGenerating }] = useGenerateContentMutation();
   const [savePdfExport] = useSavePdfExportMutation();
 
   const handleGenerateContent = async () => {
     if (!event) return;
     try {
-      toast.info('Generating AI content...');
-      
-      const descResult = await generateWithGemini({
-        eventId: event.id,
-        eventName: event.eventName,
-        speakerName: event.speakerName,
-        speakerDesignation: event.speakerDesignation,
-        promptType: 'description',
-        creativity: '0.7',
-        tone: 'Professional',
-        length: 'Medium'
-      }).unwrap();
+      const settingsStr = localStorage.getItem('eventpro_settings');
+      const settings = settingsStr ? JSON.parse(settingsStr) : {};
+      const apiKey = settings.geminiApiKey;
 
-      const introResult = await generateWithGemini({
-        eventId: event.id,
-        eventName: event.eventName,
-        speakerName: event.speakerName,
-        speakerDesignation: event.speakerDesignation,
-        promptType: 'speakerIntro',
-        creativity: '0.7',
-        tone: 'Professional',
-        length: 'Short'
-      }).unwrap();
-
-      // We should ideally save this to the event, but the backend doesn't take these fields in update if it's restricted.
-      // Wait, the backend updateEvent DOES take EventInput, which has description/speakerIntro optional? 
-      // Let's assume we just store the history for the frontend AI Content page, and maybe call the backend if we need to.
-      // The instructions say "Do NOT change backend APIs...". We will use our local history.
-      
-      await saveAiHistory({
-        eventId: event.id,
-        eventName: event.eventName,
-        promptType: 'Description & Intro (Combined)',
-        generatedContent: `--- Description ---\n${descResult}\n\n--- Speaker Intro ---\n${introResult}`
-      }).unwrap();
-
-      toast.success('Content generated successfully via Gemini API!');
-      // Since it's frontend-only generation in this flow, we might need a way to display it if we don't save to backend.
-      // Actually, wait, backend has a generateContent endpoint that already updates it. Let's just use that for the details page if we want it permanently on the event model.
-      // But the prompt says use Gemini API only. We can just use the backend if it's there?
-      // I'll leave the display logic based on event.description for now, but to avoid touching the backend I will display the generated content from local state if available.
+      toast.info('Generating AI content via backend API...');
+      await generateContent({ id: event.id, apiKey }).unwrap();
+      toast.success('Content generated and saved successfully!');
     } catch (error: any) {
-      toast.error(error?.data?.message || 'Failed to generate content with Gemini API');
+      toast.error(error?.data?.message || 'Failed to generate content. Please ensure backend is configured or API key is set in Settings.');
     }
   };
 
