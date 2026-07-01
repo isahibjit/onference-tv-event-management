@@ -18,6 +18,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/events', eventRoutes);
+// Fallback route in case the frontend forgot the /api suffix in their env variables
+app.use('/events', eventRoutes);
 
 // Error Handling
 app.use(notFoundHandler);
