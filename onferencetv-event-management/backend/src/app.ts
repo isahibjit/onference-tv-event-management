@@ -8,7 +8,7 @@ import { notFoundHandler } from './middlewares/not-found.middleware';
 const app = express();
 
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: [env.FRONTEND_URL, 'https://onference-tv-event-management.onrender.com'],
 }));
 app.use(express.json());
 
