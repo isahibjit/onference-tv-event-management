@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useGetEventsQuery, useGenerateContentMutation } from '@/app/apiSlice';
+import { useNavigate } from 'react-router-dom';
+import { useGetEventsQuery } from '@/app/apiSlice';
 import { format } from 'date-fns';
 import { 
-  Search, Eye, Edit, Trash2, MoreVertical, 
-  ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Sparkles
+  Search, Eye, Edit, Trash2, 
+  ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,16 +12,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
 import { useAppDispatch } from '@/app/hooks';
-import { openEditDialog, openDeleteDialog, openViewDialog, openCreateDialog } from '@/features/events/eventSlice';
+import { openEditDialog, openDeleteDialog, openCreateDialog } from '@/features/events/eventSlice';
 
 export function EventsTable() {
   const { data, isLoading } = useGetEventsQuery();
-  const [generateContent] = useGenerateContentMutation();
+  const events = data?.data || [];
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -36,7 +36,6 @@ export function EventsTable() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const events = data?.data || [];
 
   const filteredAndSortedEvents = useMemo(() => {
     let result = [...events];
@@ -85,15 +84,6 @@ export function EventsTable() {
       return <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 shadow-none border-0 font-medium">Upcoming</Badge>;
     }
     return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none border-0 font-medium">Completed</Badge>;
-  };
-
-  const handleGenerateAI = async (id: string) => {
-    try {
-      await generateContent(id).unwrap();
-      toast.success("AI Content Generated Successfully!");
-    } catch (error) {
-      toast.error("Failed to generate AI content.");
-    }
   };
 
   return (
@@ -204,7 +194,7 @@ export function EventsTable() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => dispatch(openViewDialog(event.id))}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => navigate(`/events/${event.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-indigo-600" onClick={() => dispatch(openEditDialog(event.id))}>
@@ -213,18 +203,6 @@ export function EventsTable() {
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600" onClick={() => dispatch(openDeleteDialog(event.id))}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => handleGenerateAI(event.id)} className="cursor-pointer">
-                            <Sparkles className="mr-2 h-4 w-4 text-purple-500" /> Generate AI Content
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>

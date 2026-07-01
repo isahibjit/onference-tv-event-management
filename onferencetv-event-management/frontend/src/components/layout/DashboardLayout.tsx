@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
+import { EventFormDialog } from '@/features/events/EventFormDialog';
+import { DeleteEventDialog } from '@/features/events/DeleteEventDialog';
 
 export function DashboardLayout() {
   return (
@@ -12,6 +14,10 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      
+      {/* Global Dialogs */}
+      <EventFormDialog />
+      <DeleteEventDialog />
     </div>
   );
 }

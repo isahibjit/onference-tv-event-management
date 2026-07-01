@@ -1,8 +1,13 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import EventDashboard from './features/dashboard/EventDashboard';
+import { EventDetailsPage } from './features/events/EventDetailsPage';
+import { AiContentPage } from './features/ai/AiContentPage';
+import { PdfExportsPage } from './features/pdf/PdfExportsPage';
+import { ReportsPage } from './features/reports/ReportsPage';
+import { SettingsPage } from './features/settings/SettingsPage';
 
 function App() {
   return (
@@ -10,12 +15,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<EventDashboard />} />
-            <Route path="events" element={<div className="p-8">Events (Coming Soon)</div>} />
-            <Route path="ai-content" element={<div className="p-8">AI Content (Coming Soon)</div>} />
-            <Route path="pdf-exports" element={<div className="p-8">PDF Exports (Coming Soon)</div>} />
-            <Route path="reports" element={<div className="p-8">Reports (Coming Soon)</div>} />
-            <Route path="settings" element={<div className="p-8">Settings (Coming Soon)</div>} />
+            <Route index element={<Navigate to="/events" replace />} />
+            <Route path="events" element={<EventDashboard />} />
+            <Route path="events/:id" element={<EventDetailsPage />} />
+            <Route path="ai-content" element={<AiContentPage />} />
+            <Route path="pdf-exports" element={<PdfExportsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>
         <Toaster position="top-right" richColors />

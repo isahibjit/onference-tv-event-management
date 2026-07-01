@@ -4,7 +4,7 @@ import type { EventResponse, EventInput } from '../features/events/eventSchemas'
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api' }),
-  tagTypes: ['Event'],
+  tagTypes: ['Event', 'Settings', 'AiHistory', 'PdfExport'],
   endpoints: (builder) => ({
     getEvents: builder.query<{ data: EventResponse[] }, void>({
       query: () => '/events',

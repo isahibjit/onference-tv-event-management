@@ -4,9 +4,6 @@ import { UpcomingEventsPanel } from "./components/UpcomingEventsPanel";
 import { MonthlyStatistics } from "./components/MonthlyStatistics";
 import { QuickActions } from "./components/QuickActions";
 import { RecentActivity } from "./components/RecentActivity";
-import { EventFormDialog } from "@/features/events/EventFormDialog";
-import { DeleteEventDialog } from "@/features/events/DeleteEventDialog";
-import { EventDetailsDialog } from "@/features/events/EventDetailsDialog";
 
 export default function EventDashboard() {
   return (
@@ -27,11 +24,6 @@ export default function EventDashboard() {
           <QuickActions />
         </div>
       </div>
-
-      {/* Dialogs */}
-      <EventFormDialog />
-      <DeleteEventDialog />
-      <EventDetailsDialog />
     </div>
   );
 }
