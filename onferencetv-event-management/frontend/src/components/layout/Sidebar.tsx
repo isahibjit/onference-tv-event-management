@@ -31,7 +31,7 @@ export function Sidebar() {
         <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground">
           <CalendarDays className="h-5 w-5" />
         </div>
-        <span className="font-bold text-xl tracking-tight">EventPro</span>
+        <span className="font-bold text-xl tracking-tight">Ofference Events</span>
       </div>
 
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
