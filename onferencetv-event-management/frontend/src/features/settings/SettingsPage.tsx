@@ -93,6 +93,7 @@ export function SettingsPage() {
 
   const handleTestConnection = async () => {
     const apiKey = watch("geminiApiKey");
+    const aiModel = watch("aiModel") || "gemini-pro";
     if (!apiKey) {
       toast.error("Please enter a Gemini API Key first");
       return;
@@ -102,17 +103,17 @@ export function SettingsPage() {
     try {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: aiModel });
       const result = await model.generateContent("Say exactly: OK");
       if (result.response.text().includes("OK")) {
         setTestStatus("success");
-        toast.success("Connection successful!");
+        toast.success(`Connection to ${aiModel} successful!`);
       } else {
         throw new Error("Invalid response");
       }
     } catch (error) {
       setTestStatus("error");
-      toast.error("Connection failed. Please check your API key.");
+      toast.error("Connection failed. Check your API key or try selecting 'Gemini Pro (Classic)'.");
     }
   };
 
@@ -381,6 +382,9 @@ export function SettingsPage() {
                           </SelectItem>
                           <SelectItem value="gemini-1.5-pro">
                             Gemini 1.5 Pro (Advanced)
+                          </SelectItem>
+                          <SelectItem value="gemini-pro">
+                            Gemini Pro (Classic)
                           </SelectItem>
                         </SelectContent>
                       </Select>

@@ -51,9 +51,10 @@ export function EventDetailsPage() {
       const settingsStr = localStorage.getItem("eventpro_settings");
       const settings = settingsStr ? JSON.parse(settingsStr) : {};
       const apiKey = settings.geminiApiKey;
+      const aiModel = settings.aiModel;
 
       toast.info("Generating AI content via backend API...");
-      await generateContent({ id: event.id, apiKey }).unwrap();
+      await generateContent({ id: event.id, apiKey, aiModel }).unwrap();
       toast.success("Content generated and saved successfully!");
     } catch (error: any) {
       toast.error(

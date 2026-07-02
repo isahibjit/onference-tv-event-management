@@ -43,11 +43,11 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: (_result, _error, id) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
     }),
-    generateContent: builder.mutation<{ data: EventResponse }, { id: string; apiKey?: string }>({
-      query: ({ id, apiKey }) => ({
+    generateContent: builder.mutation<{ data: EventResponse }, { id: string; apiKey?: string; aiModel?: string }>({
+      query: ({ id, apiKey, aiModel }) => ({
         url: `/events/${id}/generate-content`,
         method: 'POST',
-        body: { apiKey },
+        body: { apiKey, aiModel },
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'Event', id }, { type: 'Event', id: 'LIST' }],
     }),

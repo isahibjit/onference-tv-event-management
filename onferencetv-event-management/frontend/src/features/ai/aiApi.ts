@@ -72,7 +72,7 @@ export const aiApi = apiSlice.injectEndpoints({
           }
           
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: settings.aiModel || 'gemini-1.5-flash' });
+          const model = genAI.getGenerativeModel({ model: settings.aiModel || 'gemini-pro' });
           
           let prompt = '';
           if (params.promptType === 'description') {

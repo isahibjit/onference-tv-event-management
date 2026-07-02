@@ -39,7 +39,7 @@ export const deleteEvent = async (id: string) => {
   });
 };
 
-export const generateContent = async (id: string, clientApiKey?: string) => {
+export const generateContent = async (id: string, clientApiKey?: string, clientAiModel?: string) => {
   const event = await prisma.event.findUnique({ where: { id } });
   if (!event) return null;
 
@@ -47,12 +47,13 @@ export const generateContent = async (id: string, clientApiKey?: string) => {
   let speakerIntro = '';
 
   const finalApiKey = clientApiKey || env.GEMINI_API_KEY;
+  const finalModel = clientAiModel || 'gemini-pro';
 
   if (finalApiKey && (env.AI_PROVIDER === 'gemini' || !env.AI_PROVIDER)) {
     try {
       const { GoogleGenerativeAI } = require('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(finalApiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: finalModel });
 
       const descPrompt = `Write an engaging and professional event description for an event named "${event.eventName}". The tone should be Professional. The length should be Medium. The speaker is ${event.speakerName} (${event.speakerDesignation}). Make it sound like a premium industry event.`;
       const descResult = await model.generateContent(descPrompt);
@@ -61,8 +62,11 @@ export const generateContent = async (id: string, clientApiKey?: string) => {
       const introPrompt = `Write a professional speaker introduction for ${event.speakerName}, who is a ${event.speakerDesignation}. They are speaking at the event "${event.eventName}". Highlight their expertise and why attendees should listen to them.`;
       const introResult = await model.generateContent(introPrompt);
       speakerIntro = introResult.response.text();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Gemini generation failed:', error);
+      if (error?.message) {
+        throw error;
+      }
       // Fallback
       description = `Join us for an insightful session on ${event.eventName}. In this comprehensive talk, our expert speaker will explore the latest trends.`;
       speakerIntro = `We are thrilled to introduce ${event.speakerName}, a highly respected ${event.speakerDesignation}.`;
