@@ -111,9 +111,10 @@ export function SettingsPage() {
       } else {
         throw new Error("Invalid response");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Test Connection Error:", error);
       setTestStatus("error");
-      toast.error("Connection failed. Check your API key or try selecting 'Gemini Pro (Classic)'.");
+      toast.error(`Connection failed: ${error?.message || "Unknown error"}. Check your API key or try selecting 'Gemini Pro (Classic)'.`);
     }
   };
 

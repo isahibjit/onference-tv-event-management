@@ -49,7 +49,7 @@ export const generateContent = async (id: string, clientApiKey?: string, clientA
   const finalApiKey = clientApiKey || env.GEMINI_API_KEY;
   const finalModel = clientAiModel || 'gemini-pro';
 
-  if (finalApiKey && (env.AI_PROVIDER === 'gemini' || !env.AI_PROVIDER)) {
+  if (finalApiKey) {
     try {
       const { GoogleGenerativeAI } = require('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(finalApiKey);
@@ -71,13 +71,6 @@ export const generateContent = async (id: string, clientApiKey?: string, clientA
       description = `Join us for an insightful session on ${event.eventName}. In this comprehensive talk, our expert speaker will explore the latest trends.`;
       speakerIntro = `We are thrilled to introduce ${event.speakerName}, a highly respected ${event.speakerDesignation}.`;
     }
-  } else if (env.OPENAI_API_KEY && env.AI_PROVIDER === 'openai') {
-    description = `Join us for an insightful session on ${event.eventName}. In this comprehensive talk, our expert speaker will explore the latest trends, best practices, and innovative strategies shaping the future of the industry. This is a must-attend event for professionals looking to stay ahead of the curve.
-
-During this session, attendees will gain actionable insights and practical knowledge that can be immediately applied to their work. Whether you are a seasoned veteran or new to the field, the content is designed to be accessible and highly valuable.
-
-Don't miss this opportunity to connect with peers, ask questions, and learn from one of the best in the business. We look forward to welcoming you!`;
-    speakerIntro = `We are thrilled to introduce ${event.speakerName}, a highly respected ${event.speakerDesignation}. With a wealth of experience and a track record of success, ${event.speakerName} brings a unique perspective and deep expertise to the topic. Prepare to be inspired by their engaging delivery and profound insights.`;
   } else {
     // Deterministic local placeholder
     description = `[AI Placeholder]: Join us for an insightful session on ${event.eventName}. In this comprehensive talk, our expert speaker will explore the latest trends, best practices, and innovative strategies shaping the future of the industry.
