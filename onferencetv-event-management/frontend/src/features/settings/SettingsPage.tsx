@@ -81,6 +81,18 @@ export function SettingsPage() {
     }
   }, [settings, reset]);
 
+  // Manually register custom controlled fields so react-hook-form tracks them correctly
+  useEffect(() => {
+    register("timezone");
+    register("language");
+    register("theme");
+    register("aiModel");
+    register("pdfPaperSize");
+    register("pdfOrientation");
+    register("pdfIncludeImage");
+    register("pdfIncludeAi");
+  }, [register]);
+
   const onSubmit = async (data: any) => {
     try {
       await updateSettings(data).unwrap();
@@ -94,6 +106,8 @@ export function SettingsPage() {
   const handleTestConnection = async () => {
     const apiKey = watch("geminiApiKey");
     const aiModel = watch("aiModel") || "gemini-pro";
+    console.log("Testing Gemini Connection. Model:", aiModel);
+    
     if (!apiKey) {
       toast.error("Please enter a Gemini API Key first");
       return;
