@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import jsPDF from "jspdf";
+import { generatePdfDocument } from "@/features/pdf/pdfGenerator";
 import {
   Download,
   Sparkles,
@@ -68,45 +68,20 @@ export function EventDetailsPage() {
     if (!event) return;
 
     try {
-      const doc = new jsPDF();
-      const margin = 20;
-      let y = margin;
-
-      doc.setFontSize(22);
-      doc.text("Event Details", margin, y);
-      y += 10;
-
-      doc.setFontSize(14);
-      doc.setTextColor(100);
-      doc.text(event.eventName, margin, y);
-      y += 15;
-
-      doc.setFontSize(12);
-      doc.setTextColor(0);
-      doc.text(`Date: ${format(new Date(event.eventDate), "PPP")}`, margin, y);
-      y += 10;
-      doc.text(
-        `Speaker: ${event.speakerName} - ${event.speakerDesignation}`,
-        margin,
-        y,
-      );
-      y += 15;
-
-      if (event.description) {
-        doc.setFontSize(14);
-        doc.text("Description", margin, y);
-        y += 8;
-        doc.setFontSize(11);
-        const splitDesc = doc.splitTextToSize(event.description, 170);
-        doc.text(splitDesc, margin, y);
-        y += splitDesc.length * 6 + 10;
-      }
+      const doc = generatePdfDocument({
+        eventName: event.eventName,
+        eventDate: event.eventDate,
+        speakerName: event.speakerName,
+        speakerDesignation: event.speakerDesignation,
+        description: event.description,
+        speakerIntro: event.speakerIntro,
+      });
 
       const pdfBlob = doc.output("blob");
       const sizeStr = (pdfBlob.size / 1024).toFixed(2) + " KB";
 
       doc.save(
-        `event-${event.eventName.replace(/\\s+/g, "-").toLowerCase()}.pdf`,
+        `event-${event.eventName.replace(/\s+/g, "-").toLowerCase()}.pdf`,
       );
 
       await savePdfExport({
@@ -115,6 +90,11 @@ export function EventDetailsPage() {
         generatedBy: "Admin",
         fileSize: sizeStr,
         status: "Completed",
+        eventDate: String(event.eventDate),
+        speakerName: event.speakerName,
+        speakerDesignation: event.speakerDesignation,
+        description: event.description || "",
+        speakerIntro: event.speakerIntro || "",
       }).unwrap();
 
       toast.success("PDF exported and logged to history");

@@ -8,6 +8,11 @@ export interface PdfExportItem {
   fileSize: string;
   status: 'Completed' | 'Pending' | 'Failed';
   timestamp: string;
+  eventDate?: string;
+  speakerName?: string;
+  speakerDesignation?: string;
+  description?: string;
+  speakerIntro?: string;
 }
 
 const getLocalPdfHistory = (): PdfExportItem[] => {
